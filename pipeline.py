@@ -58,7 +58,7 @@ if not WGET_AT:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = '20230327.02'
+VERSION = '20230327.03'
 USER_AGENT = 'Archive Team'
 TRACKER_ID = 'zippyshare'
 TRACKER_HOST = 'legacy-api.arpa.li'
@@ -215,9 +215,9 @@ class WgetArgs(object):
                 server_id, file_id = item_value.split(':', 1)
                 wget_args.extend(['--warc-header', 'zippyshare-file: '+file_id])
                 wget_args.append('https://www{}.zippyshare.com/v/{}/file.html'.format(server_id, file_id))
-            #elif item_type == 'user':
-            #    wget_args.extend(['--warc-header', 'zippyshare-user: '+item_value])
-            #    wget_args.append('https://zippyshare.com/'+item_value)
+            elif item_type == 'user':
+                wget_args.extend(['--warc-header', 'zippyshare-user: '+item_value])
+                wget_args.append('https://zippyshare.com/'+item_value)
             else:
                 raise Exception('Unknown item')
 
