@@ -244,19 +244,25 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
     html = read_file(file)
     if string.match(url, "^https?://[^/]+/v/") then
       local a, b = string.match(html, "document%.getElementById%('dlbutton'%)%.omg%s*=%s*([0-9]+)%%([0-9]+);")
-      if not a
-        and (
-          string.match(html, ">File has expired and does not exist anymore on this server<")
-          or string.match(html, ">File does not exist on this server<")
-        ) then
-        io.stdout:write("This file is deleted.\n")
-        io.stdout:flush()
-        return urls
+      if not a then
+        local a, b, c, d = string.match(html, "document%.getElementById%('dlbutton'%)%.href%s*=%s*\"/d/[^/\"]+/\"%s*%+%s*%(([0-9]+)%s*%%%s*([0-9]+)%s*%+%s*([0-9]+)%s*%%%s*([0-9]+)%)%s*%+%s*\"")
+        if not a
+          and (
+            string.match(html, ">File has expired and does not exist anymore on this server<")
+            or string.match(html, ">File does not exist on this server<")
+          ) then
+          io.stdout:write("This file is deleted.\n")
+          io.stdout:flush()
+          return urls
+        end
+        local value = a % b + c % d
+        html = string.gsub(html, '/"%s*%+%s*%(' .. a .. '%s*%%%s*' .. b .. '%s*%+%s*' .. c .. '%s*%%%s*' .. d .. '%)%s*%+%s*"/', "/" .. tostring(value) .. "/")
+      else
+        local c, d = string.match(html, "var%s+b%s*=%s*parseInt%(document%.getElementById%('dlbutton'%)%.omg%)%s*%*%s*%(([0-9]+)%%([0-9]+)%);")
+        local e = string.match(html, "document%.getElementById%('dlbutton'%)%.href%s*=%s*\"/d/[^/\"]+/\"%+%(b%+([0-9]+)%)%+\"")
+        local value = (a % b) * (c % d) + e
+        html = string.gsub(html, '/"%+%(b%+' .. e .. '%)%+"/', "/" .. tostring(value) .. "/")
       end
-      local c, d = string.match(html, "var%s+b%s*=%s*parseInt%(document%.getElementById%('dlbutton'%)%.omg%)%s*%*%s*%(([0-9]+)%%([0-9]+)%);")
-      local e = string.match(html, "document%.getElementById%('dlbutton'%)%.href%s*=%s*\"/d/[^/\"]+/\"%+%(b%+([0-9]+)%)%+\"")
-      local value = (a % b) * (c % d) + e
-      html = string.gsub(html, '/"%+%(b%+' .. e .. '%)%+"/', "/" .. tostring(value) .. "/")
       for s in string.gmatch(html, "setLocale%('([a-z]+)'%);") do
         check("https://www16.zippyshare.com/view.jsp?locale=" .. s .. "&key=" .. item_file_id)
       end
